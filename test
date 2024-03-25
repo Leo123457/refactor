@@ -1,0 +1,17 @@
+#!/usr/bin/zsh
+
+gcc -std=c99 -O2 -Wall $1.c -o $1 || exit 1
+
+for ((i = 0; i < 20; i++))
+do
+    if [ -f "./cases/$i.in" ]; then
+        ./$1 < "./cases/$i.in" > tmp
+        if cmp -s -- "tmp" "./cases/$i.out"; then
+            printf "%2d: OK\n" $i
+        else
+            printf "%2d: NOT OK\n" $i
+        fi
+    fi
+done
+
+[ -f tmp ] && rm tmp
