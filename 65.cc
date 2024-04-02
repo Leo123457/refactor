@@ -1,67 +1,70 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#define MAX 33
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
+using namespace std;
 
 typedef struct Stack {
-    char a[500][MAX];
-    int t;
+    vector<string> a;
 } Stack;
 
-void push(Stack *s, char *o) {
-    strcpy(s->a[++s->t], o);
+void push(Stack *s, string o) {
+    s->a.push_back(o);
 }
 
-char *pop(Stack *s) {
-    return s->a[s->t--];
+string pop(Stack *s) {
+    string o = s->a.back();
+    s->a.pop_back();
+    return o;
 }
 
-char *find(char *s, char a[50][2][MAX], int c) {
-    for (int i = 0; i < c; i++) {
-        if (!strcmp(a[i][0], s)) {
-            return a[i][1];
+string find(string s, vector<vector<string>> a) {
+    for (vector<string> i : a) {
+        if (i[0] == s) {
+            return i[1];
         }
     }
 }
 
 int main() {
-    int c = 0;
-    char a[50][2][MAX], b[1001], v[MAX], x[MAX], y[MAX];
+    vector<vector<string>> a;
+    string b, v, x, y, o;
 
-    fgets(b, 1001, stdin);
-    b[strcspn(b, "\n")] = 0;
-    while (scanf("%s = %s", x, y) == 2) {
-        strcpy(a[c][0], x);
-        strcpy(a[c++][1], y);
+    getline(cin, b);
+    stringstream ss(b);
+    while (cin >> x >> o >> y) {
+        a.push_back({x, y});
     }
-    Stack *s = malloc(sizeof(Stack));
-    s->t = -1;
-    for (char *p = strtok(b, " "); p; p = strtok(0, " ")) {
-        if (*p == ' ' || *p == '(') {
+    Stack *s = new Stack();
+    string p;
+    while (ss >> p) {
+        if (p == "(") {
             continue;
-        } else if (*p == ')') {
-            strcpy(y, pop(s));
-            if (*y != '-' && (*y < '0' || *y > '9')) {
-                strcpy(y, find(y, a, c));
+        } else if (p == ")") {
+            y = pop(s);
+            if (y[0] != '-' && (y[0] < '0' || y[0] > '9')) {
+                y = find(y, a);
             }
-            strcpy(x, pop(s));
-            if (*x != '-' && (*x < '0' || *x > '9')) {
-                strcpy(x, find(x, a, c));
+            x = pop(s);
+            if (x[0] != '-' && (x[0] < '0' || x[0] > '9')) {
+                x = find(x, a);
             }
-            strcpy(v, pop(s));
-            if (*v == '+') {
-                sprintf(s->a[++s->t], "%ld", strtol(x, 0, 10) + strtol(y, 0, 10));
-            } else if (*v == '-') {
-                sprintf(s->a[++s->t], "%ld", strtol(x, 0, 10) - strtol(y, 0, 10));
-            } else if (*v == '*') {
-                sprintf(s->a[++s->t], "%ld", strtol(x, 0, 10) * strtol(y, 0, 10));
-            } else if (*v == '/') {
-                sprintf(s->a[++s->t], "%ld", strtol(x, 0, 10) / strtol(y, 0, 10));
+            v = pop(s);
+            if (v == "+") {
+                push(s, to_string(stoi(x) + stoi(y)));
+            } else if (v == "-") {
+                push(s, to_string(stoi(x) - stoi(y)));
+            } else if (v == "*") {
+                push(s, to_string(stoi(x) * stoi(y)));
+            } else if (v == "/") {
+                push(s, to_string(stoi(x) / stoi(y)));
             }
         } else {
             push(s, p);
         }
     }
-    printf("%s\n", pop(s));
+    cout << pop(s) << '\n';
+    delete s;
     return 0;
 }
