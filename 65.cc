@@ -1,23 +1,10 @@
 #include <iostream>
 #include <sstream>
+#include <stack>
 #include <string>
 #include <vector>
 
 using namespace std;
-
-typedef struct Stack {
-    vector<string> a;
-} Stack;
-
-void push(Stack *s, string o) {
-    s->a.push_back(o);
-}
-
-string pop(Stack *s) {
-    string o = s->a.back();
-    s->a.pop_back();
-    return o;
-}
 
 string find(string s, vector<vector<string>> a) {
     for (vector<string> i : a) {
@@ -36,35 +23,37 @@ int main() {
     while (cin >> x >> o >> y) {
         a.push_back({x, y});
     }
-    Stack *s = new Stack();
+    stack<string> s;
     string p;
     while (ss >> p) {
         if (p == "(") {
             continue;
         } else if (p == ")") {
-            y = pop(s);
+            y = s.top();
+            s.pop();
             if (y[0] != '-' && (y[0] < '0' || y[0] > '9')) {
                 y = find(y, a);
             }
-            x = pop(s);
+            x = s.top();
+            s.pop();
             if (x[0] != '-' && (x[0] < '0' || x[0] > '9')) {
                 x = find(x, a);
             }
-            v = pop(s);
+            v = s.top();
+            s.pop();
             if (v == "+") {
-                push(s, to_string(stoi(x) + stoi(y)));
+                s.push(to_string(stoi(x) + stoi(y)));
             } else if (v == "-") {
-                push(s, to_string(stoi(x) - stoi(y)));
+                s.push(to_string(stoi(x) - stoi(y)));
             } else if (v == "*") {
-                push(s, to_string(stoi(x) * stoi(y)));
+                s.push(to_string(stoi(x) * stoi(y)));
             } else if (v == "/") {
-                push(s, to_string(stoi(x) / stoi(y)));
+                s.push(to_string(stoi(x) / stoi(y)));
             }
         } else {
-            push(s, p);
+            s.push(p);
         }
     }
-    cout << pop(s) << '\n';
-    delete s;
+    cout << s.top() << '\n';
     return 0;
 }
