@@ -7,17 +7,20 @@
 using namespace std;
 
 enum Type { NUM,
+            VAR,
             ADD,
             SUB,
             MUL,
             DIV };
 
 class Item {
+    string name;
     int value;
     Type type;
 
   public:
-    Item(const int v = 0, const Type t = NUM) : value{v}, type{t} {}
+    Item(const int v = 0) : value{v}, type{NUM} {}
+    Item(const string &n, const int v) : name{n}, value{v}, type{VAR} {}
     Item(const string &s) {
         if (s == "+") {
             type = ADD;
@@ -33,32 +36,22 @@ class Item {
         }
     }
     int getValue() const { return value; }
-    Item arithmetic(const Item &x, const Item &b) {
+    string getName() const { return name; }
+    Item arithmetic(const Item &a, const Item &b) const {
         switch (type) {
             case ADD:
-                return Item(x.getValue() + b.getValue());
+                return Item(a.getValue() + b.getValue());
             case SUB:
-                return Item(x.getValue() - b.getValue());
+                return Item(a.getValue() - b.getValue());
             case MUL:
-                return Item(x.getValue() * b.getValue());
+                return Item(a.getValue() * b.getValue());
             case DIV:
-                return Item(x.getValue() / b.getValue());
+                return Item(a.getValue() / b.getValue());
             default:
                 cout << "invalid arithmetic\n";
                 exit(-1);
         }
     }
-};
-
-class Variable {
-    string name;
-    int value;
-
-  public:
-    Variable(const string n = "", const int v = 0) : name{n}, value{v} {}
-    string getName() const { return name; }
-    int getValue() const { return value; }
-    void setValue(const int v) { value = v; }
     static bool isVariable(const string &s) {
         for (auto i : s) {
             if (!isalpha(i) && i != '_' && i != '$' && !isdigit(i)) {
@@ -70,7 +63,7 @@ class Variable {
 };
 
 class VariableSet {
-    vector<Variable> variables;
+    vector<Item> variables;
 
   public:
     VariableSet() {
@@ -78,7 +71,7 @@ class VariableSet {
         char equal;
         int value;
         while (cin >> name >> equal >> value) {
-            variables.push_back(Variable(name, value));
+            variables.push_back(Item(name, value));
         }
     }
     Item find(const string n) const {
@@ -118,7 +111,7 @@ class Statements {
                 s.pop();
                 s.push(o.arithmetic(x, y));
             } else {
-                if (Variable::isVariable(item)) {
+                if (Item::isVariable(item)) {
                     s.push(v.find(item));
                 } else {
                     s.push(Item(item));
